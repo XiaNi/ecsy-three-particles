@@ -19,41 +19,52 @@
       import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 
       const DEG2RAD = THREE.MathUtils.DEG2RAD
-      class Translating extends ECSY.Component {}
-      Translating.schema = {
+      class Firework extends ECSY.Component {}
+      Firework.schema = {
         x: { type: ECSY.Types.Number, default: 0 },
         y: { type: ECSY.Types.Number, default: 0 },
         z: { type: ECSY.Types.Number, default: 0 }
       }
-
-      class TranslatingSystem extends ECSY.System {
+      let time = 2
+      class FireworkSystem extends ECSY.System {
         execute(dt, t) {
           for (let entity of this.queries.translating.results) {
-            const translating = entity.getComponent(Translating)
+            const translating = entity.getComponent(Firework)
             /** @type {ECSYTHREEX.Transform} */
             const transform = entity.getMutableComponent(ECSYTHREEX.Transform)
-            transform.position.y += 0.01
+              //console.log(entity.getComponent(PARTICLES.ParticleEmitter))
+              if(t < 100)  {
+
+                time -= dt
+
+                if(time < 0 && time > -2){
+                   entity.removeComponent(PARTICLES.ParticleEmitter)
+               }
+              }
           }
         }
       }
 
-      TranslatingSystem.queries = {
+      FireworkSystem.queries = {
         translating: {
-          components: [Translating, ECSYTHREEX.Transform],
-          changed: true
+          components: [Firework, ECSYTHREEX.Transform],
+          listen:{
+            changed: true,
+            removed: true
+          }
         }
       }
       
 
       const world = new ECSYTHREE.ECSYThreeWorld()
         // .registerSystem(ECSYTHREE.VRControllerSystem)
-        .registerSystem(TranslatingSystem)
         .registerComponent(ECSYTHREEX.Transform)
-        .registerComponent(Translating)
+        .registerComponent(Firework)
+        .registerSystem(FireworkSystem)
 
       PARTICLES.initializeParticleSystem(world)
 
-      const data = ECSYTHREEX.initialize(world, { vr: false })
+      const data = ECSYTHREEX.initialize(world, { vr: false, debug: true })
 
       const { scene, renderer, camera } = data.entities
 
@@ -94,38 +105,79 @@
           worldUp: true,
           colors: [ color ],
           radialAcceleration: 0.05,
-          opacities: [0, 1],
-          scales: [1, 0],
+          opacities: [0, 1, 0.5],
+          scales: [1],
           syncTransform: true,
           velocity: { x: 0, y: -1, z: 0 }
         })
         .addComponent(ECSYTHREEX.Transform, {
           position: { x: PARTICLES.randomNumber(-1, 1), y: 0, z: 0 },
        })
-        .addComponent(Translating, {
-             x: 0, y: 0, z: 0
-        })
 
-      world
+        world
         .createEntity()
         .addComponent(PARTICLES.ParticleEmitter, {
           particleMesh: sharedParticleMesh,
-          atlas: "fireworks_sheet.png",
-          textureFrame: { cols: 5, rows: 5 },
+          atlas: "blob.png",
+          count: 200,
+          lifeTime: 2,
           worldUp: true,
+          colors: [ new THREE.Color("green") ],
+          radialAcceleration: 0.05,
+          opacities: [0, 1, 0.5],
+          scales: [1],
           syncTransform: true,
-          count: 6,
-          lifeTime: [1, 2],
-          repeatTime: 8,
-          colors: [ color ],
-          scales: [20]
+          velocity: { x: 0, y: -1, z: 0 }
         })
         .addComponent(ECSYTHREEX.Transform, {
-          position: { x: 0, y: 0, z: 0 },
+          position: { x: PARTICLES.randomNumber(-1, 1), y: 0, z: 0 },
        })
-        .addComponent(ECSYTHREEX.Parent, { value: tail })
+               .addComponent(Firework, {
+             x: 0, y: 0, z: 0
+        })
+        world
+        .createEntity()
+        .addComponent(PARTICLES.ParticleEmitter, {
+          particleMesh: sharedParticleMesh,
+          atlas: "blob.png",
+          count: 200,
+          lifeTime: 2,
+          worldUp: true,
+          colors: [ new THREE.Color("blue") ],
+          radialAcceleration: 0.05,
+          opacities: [0, 1, 0.5],
+          scales: [1],
+          syncTransform: true,
+          velocity: { x: 0, y: -1, z: 0 }
+        })
+        .addComponent(ECSYTHREEX.Transform, {
+          position: { x: PARTICLES.randomNumber(-1, 1), y: 0, z: 0 },
+       })
+
+      // world
+      //   .createEntity()
+      //   .addComponent(PARTICLES.ParticleEmitter, {
+      //     particleMesh: sharedParticleMesh,
+      //     atlas: "fireworks_sheet.png",
+      //     textureFrame: { cols: 5, rows: 5 },
+      //     worldUp: true,
+      //     syncTransform: true,
+      //     count: 6,
+      //     lifeTime: [1, 2],
+      //     repeatTime: 8,
+      //     colors: [ color ],
+      //     scales: [150]
+      //   })
+      //   .addComponent(ECSYTHREEX.Transform, {
+      //     position: { x: 0, y: 0, z: 0 },
+      //  })
+      //   .addComponent(ECSYTHREEX.Parent, { value: tail })
+      //   .addComponent(Firework, {
+      //        x: 0, y: 0, z: 0
+      //   })
 
         world.execute(0.000001, 0.000001)
+      //   console.log(world)
     </script>
   </head>
   <body></body>
