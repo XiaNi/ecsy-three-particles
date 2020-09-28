@@ -18,8 +18,10 @@ import {
 export class ParticleSystem extends System {
   execute(deltaTime, time): void {
     for (const entity of this.queries.emitters.added) {
-      const emitter = entity.getComponent(ParticleEmitter)
-      const object3D = entity.getComponent(Object3DComponent)
+      const emitter = entity.getComponent(ParticleEmitter) as ParticleEmitter
+      const object3D = entity.getComponent(
+        Object3DComponent
+      ) as Object3DComponent
 
       const matrixWorld = calcMatrixWorld(entity)
       if (!emitter.useEntityRotation) {
@@ -35,7 +37,9 @@ export class ParticleSystem extends System {
     }
 
     for (const entity of this.queries.emitterStates.results) {
-      const emitterState = entity.getComponent(ParticleEmitterState)
+      const emitterState = entity.getComponent(
+        ParticleEmitterState
+      ) as ParticleEmitterState
 
       if (emitterState.syncTransform) {
         const matrixWorld = calcMatrixWorld(entity)
@@ -60,7 +64,10 @@ export class ParticleSystem extends System {
     }
 
     for (const entity of this.queries.emitterStates.removed) {
-      const emitterState = entity.getComponent(ParticleEmitterState, true)
+      const emitterState = entity.getComponent(
+        ParticleEmitterState,
+        true
+      ) as ParticleEmitterState
       deleteParticleEmitter(emitterState.emitter3D)
     }
   }
@@ -101,8 +108,8 @@ const calcMatrixWorld = (function() {
   const euler = new THREE.Euler()
 
   return function calcMatrixWorld(entity, childMatrix = undefined) {
-    const object3D = entity.getComponent(Object3DComponent)
-    const transform = entity.getComponent(Transform)
+    const object3D = entity.getComponent(Object3DComponent) as Object3DComponent
+    const transform = entity.getComponent(Transform) as Transform
 
     if (object3D) {
       return childMatrix
